@@ -16,6 +16,7 @@ TOP_NUM = 1
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 360
 CAMERA_RESOLUTION = (CAMERA_WIDTH, CAMERA_HEIGHT)
+THRESHOLD = 0.3
 
 
 def main():
@@ -35,6 +36,8 @@ def main():
 
                 output = ""
                 for label, prob in result.items():
+                    if prob < THRESHOLD:
+                        break;
                     output += "{}({:.4f})".format(label, prob)
                 print(output, end='\r')
 
