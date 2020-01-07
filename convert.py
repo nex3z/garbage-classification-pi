@@ -6,10 +6,10 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
+# noinspection PyUnresolvedReferences
 def main():
     parser = build_arg_parser()
     args = parser.parse_args()
-    print(args)
 
     if args.keras_model_file is not None:
         model = load_model(args.keras_model_file)
@@ -20,15 +20,21 @@ def main():
         return
 
     if args.quant == 'default':
+        print("Using default quantization.")
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
     elif args.quant == 'size':
+        print("Using OPTIMIZE_FOR_SIZE quantization.")
         converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     elif args.quant == 'latency':
+        print("Using OPTIMIZE_FOR_LATENCY quantization.")
         converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
     elif args.quant == 'float16':
+        print("Using float16 quantization.")
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.target_spec.supported_types = [tf.lite.constants.FLOAT16]
+        # converter.target_spec.supported_types = [tf.lite.constants.FLOAT16]
+        converter.target_spec.supported_types = [tf.compat.v1.lite.constants.FLOAT16]
     elif args.quant == 'int':
+        print("Using int quantization.")
         data_generator = ImageDataGenerator(
             preprocessing_function=preprocess_input
         )
@@ -49,6 +55,8 @@ def main():
         # converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
         # converter.inference_input_type = tf.uint8
         # converter.inference_output_type = tf.uint8
+    elif args.quant is not None:
+        raise ValueError("Unrecognized quant parameter")
 
     tflite_model = converter.convert()
     open(args.output_file, 'wb').write(tflite_model)
